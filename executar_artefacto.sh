@@ -94,6 +94,12 @@ print(f" [x] Throughput (2k)   : Lexical AEAD Z_256={tp_aead['throughput_mean']/
       f"vs RFC8439+Base256={tp_rfc['throughput_mean']/1e3:.1f}k±{tp_rfc['throughput_std']/1e3:.1f}k tok/s")
 print(f" [x] DPI Regime B (60w): Binary H_b={rb_bin['media_entropia']:.4f} (Ent={rb_bin['alerta_f1_entropia_pct']:.0f}%, Bin={rb_bin['alerta_f2_binario_pct']:.0f}%) | "
       f"Ours H_b={rb_ours['media_entropia']:.4f} (Evade={rb_ours['taxa_evasao_pct']:.0f}%, {rb_ours['tamanho_medio_bytes']:.1f}B vs {rb_b256['tamanho_medio_bytes']:.1f}B Base256)")
+nist = b["nist_sp800_22_1m_bits"]
+print(" [x] NIST SP800-22 (1M) : " + ", ".join(f"{k}: p={v['p_value']:.3f}" for k, v in nist.items()) + f" | max|r_k| (lags 1-10) = {b['multi_lag_autocorr']['max_abs_r']:.4f}")
+rt = d["redteam_zipf_llr"]
+print(" [x] Red-team Zipf LLR : " + ", ".join(f"W={w}: {r['tpr_detecao_aead_pct']:.1f}%" for w, r in rt.items()) + " (deteção do fluxo AEAD; limite declarado no artigo)")
+lp = d["udp_loopback_60w"]["Lexical AEAD Z_256 (Ours)"]
+print(f" [x] UDP loopback (60w): ours recebidos={lp['recebidos']}, sinalizados={lp['sinalizados']}, >1472B={lp['acima_mtu_1472']}")
 print(f" [x] Anti-Tamper       : {tamp_ok}/{tamp_tot} rejeitados (100.0% em 4 vetores de ataque)")
 EOF
 

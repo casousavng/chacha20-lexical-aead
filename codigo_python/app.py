@@ -252,16 +252,32 @@ def derivar_deslocamentos_chacha20(
 ) -> list[int]:
     """
     Gera deslocamentos uniformes em Z_modulo consumindo blocos ChaCha20 (contador >= 1).
-    Usa cursor de leitura em O(1) por byte (evitando pop(0)) e guarda de overflow uint32.
+    Usa guarda de overflow uint32 e via rápida de 8 bits (1 byte/token, 64 tokens/bloco)
+    sempre que modulo <= 256 e 256 % modulo == 0 (ex.: N=16, 64, 128, 256), eliminando
+    desperdício de keystream e executando em tempo estritamente determinístico (Δp = 0.00).
 
-    Se rejection_sampling=True (omissão) e 65536 % modulo != 0:
-        Descarta amostras K_i >= 65536 - (65536 % modulo), garantindo Δp = 0.00 exato.
-    Para potências de 2 (ex.: modulo=256), limite_amostragem=65536 => zero rejeições
-    e execução estritamente determinística sem ramificação dependente de chave.
+    Para módulos arbitrários (ex.: N=20), amostra inteiros de 16 bits com rejection sampling
+    ativo por omissão (descarta K_i >= 65536 - (65536 % modulo), p_reject < 0.031%).
     """
     if modulo < 2 or modulo > 65536:
         raise ValueError("Módulo do léxico deve estar no intervalo [2, 65536].")
+    if qtd <= 0:
+        return []
 
+    # Via rápida 8-bit sem desperdício de keystream (1 byte/token = 64 tokens por bloco ChaCha20)
+    if modulo <= 256 and (256 % modulo == 0):
+        blocos_necessarios = (qtd + 63) // 64
+        if blocos_necessarios > 0xFFFFFFFF:
+            raise OverflowError("Limite de 2^32 - 1 blocos ChaCha20 excedido para o mesmo Nonce.")
+        stream: list[int] = []
+        for c in range(1, blocos_necessarios + 1):
+            stream.extend(chacha20_block(chave_bytes, c, nonce_bytes))
+        if modulo == 256:
+            return stream[:qtd]
+        mascara = modulo - 1
+        return [b & mascara for b in stream[:qtd]]
+
+    # Via genérica 16-bit com cursor O(1) e rejection sampling exato
     deslocamentos = []
     contador = 1
     bloco = []

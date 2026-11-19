@@ -10,7 +10,7 @@
       "alerta_f3_watchlist_pct": 100.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 0.14546
+      "latencia_us": 0.164447
     },
     "Raw RFC 8439 Binary": {
       "media_entropia": 5.918903048745635,
@@ -22,7 +22,7 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 178.215244
+      "latencia_us": 182.547272
     },
     "Lexical AEAD Z_20 (Legacy)": {
       "media_entropia": 3.8607993745221045,
@@ -34,7 +34,7 @@
       "alerta_f3_watchlist_pct": 100.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 190.387229
+      "latencia_us": 192.13222
     },
     "RFC 8439 + Base-256 Cover": {
       "media_entropia": 3.858601946726877,
@@ -46,19 +46,19 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 0.0,
       "taxa_evasao_pct": 100.0,
-      "latencia_us": 182.713032
+      "latencia_us": 186.962153
     },
     "Lexical AEAD Z_256 (Ours)": {
-      "media_entropia": 3.8275076645447057,
+      "media_entropia": 3.8282238373915916,
       "media_imprimivel": 100.0,
-      "tamanho_medio_bytes": 226.279,
+      "tamanho_medio_bytes": 226.386,
       "tokens_medios": 34.0,
       "alerta_f1_entropia_pct": 0.0,
       "alerta_f2_binario_pct": 0.0,
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 0.0,
       "taxa_evasao_pct": 100.0,
-      "latencia_us": 186.34005100000002
+      "latencia_us": 187.469414
     }
   },
   "regime_extenso_60w": {
@@ -72,7 +72,7 @@
       "alerta_f3_watchlist_pct": 100.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 0.17699600000000001
+      "latencia_us": 0.184392
     },
     "Raw RFC 8439 Binary": {
       "media_entropia": 7.567338838327897,
@@ -84,7 +84,7 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 772.3819139999999
+      "latencia_us": 772.059011
     },
     "Lexical AEAD Z_20 (Legacy)": {
       "media_entropia": 3.8789179724933827,
@@ -96,7 +96,7 @@
       "alerta_f3_watchlist_pct": 100.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 331.53550900000005
+      "latencia_us": 331.082182
     },
     "RFC 8439 + Base-256 Cover": {
       "media_entropia": 3.8852509734826794,
@@ -108,19 +108,19 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 0.0,
       "taxa_evasao_pct": 100.0,
-      "latencia_us": 783.381053
+      "latencia_us": 786.767933
     },
     "Lexical AEAD Z_256 (Ours)": {
-      "media_entropia": 3.864312546533965,
+      "media_entropia": 3.866035081610046,
       "media_imprimivel": 100.0,
-      "tamanho_medio_bytes": 586.89,
+      "tamanho_medio_bytes": 587.362,
       "tokens_medios": 88.0,
       "alerta_f1_entropia_pct": 0.0,
       "alerta_f2_binario_pct": 0.0,
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 0.0,
       "taxa_evasao_pct": 100.0,
-      "latencia_us": 321.231403
+      "latencia_us": 236.886508
     }
   },
   "tamper_resistance": {
@@ -129,5 +129,40 @@
     "tag_rejeitados": 250,
     "aad_e_canonico_rejeitados": 250,
     "total_por_categoria": 250
+  },
+  "redteam_zipf_llr": {
+    "10": {
+      "tpr_detecao_aead_pct": 99.4,
+      "tnr_prosa_pct": 98.9
+    },
+    "20": {
+      "tpr_detecao_aead_pct": 100.0,
+      "tnr_prosa_pct": 100.0
+    },
+    "40": {
+      "tpr_detecao_aead_pct": 100.0,
+      "tnr_prosa_pct": 100.0
+    },
+    "88": {
+      "tpr_detecao_aead_pct": 100.0,
+      "tnr_prosa_pct": 100.0
+    }
+  },
+  "udp_loopback_60w": {
+    "Raw RFC 8439 Binary": {
+      "recebidos": 300,
+      "sinalizados": 300,
+      "acima_mtu_1472": 0
+    },
+    "RFC 8439 + Base-256 Cover": {
+      "recebidos": 300,
+      "sinalizados": 0,
+      "acima_mtu_1472": 300
+    },
+    "Lexical AEAD Z_256 (Ours)": {
+      "recebidos": 300,
+      "sinalizados": 0,
+      "acima_mtu_1472": 0
+    }
   }
 }

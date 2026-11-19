@@ -359,18 +359,27 @@ def teste_vies_msb_preambulo_tag(amostras: int = 2000) -> dict[str, dict[str, fl
     chi2_256_n, _, p_256_n = teste_qui_quadrado(msb_n256_nonce, 256, MOTOR_OPTIMO_256.cob_para_id)
     chi2_256_t, _, p_256_t = teste_qui_quadrado(msb_n256_tag, 256, MOTOR_OPTIMO_256.cob_para_id)
 
+    hist_20_n = [0] * 20
+    for w in msb_n20_nonce:
+        hist_20_n[PALAVRA_PARA_ID[w]] += 1
+    hist_20_t = [0] * 20
+    for w in msb_n20_tag:
+        hist_20_t[PALAVRA_PARA_ID[w]] += 1
+
     return {
         "N20_nonce_msb": {
             "unique_observed": len(set(msb_n20_nonce)),
             "vocab_size": 20,
             "chi_sq": chi2_20_n,
             "p_value": p_20_n,
+            "hist_20": hist_20_n,
         },
         "N20_tag_msb": {
             "unique_observed": len(set(msb_n20_tag)),
             "vocab_size": 20,
             "chi_sq": chi2_20_t,
             "p_value": p_20_t,
+            "hist_20": hist_20_t,
         },
         "N256_nonce_msb": {
             "unique_observed": len(set(msb_n256_nonce)),
@@ -384,6 +393,115 @@ def teste_vies_msb_preambulo_tag(amostras: int = 2000) -> dict[str, dict[str, fl
             "chi_sq": chi2_256_t,
             "p_value": p_256_t,
         },
+    }
+
+
+# ------------------------------------------------------------------------------
+# 3B. SUBCONJUNTO CORE NIST SP 800-22 REV. 1A (1,000,000 BITS EM PYTHON PURO)
+# ------------------------------------------------------------------------------
+
+def teste_nist_sp800_22_core(num_bits: int = 1_000_000) -> dict[str, dict[str, float | bool]]:
+    """
+    Executa 4 testes canónicos NIST SP 800-22 Rev. 1a (Secções 2.1, 2.2, 2.3 e 2.4)
+    sobre 1,000,000 bits produzidos pelos índices cifrados Z_256 sob entrada 85% enviesada.
+    Critério padrão NIST: p_value >= 0.01 (nível de significância alpha = 0.01).
+    """
+    num_bytes = num_bits // 8
+    chave_64 = "47a5ccbb7e65e5f6074670814f33529a660c05903d66839e35d8f512d46b94b1"
+    chave_bytes = normalizar_chave_256bits(chave_64)
+    nonce = [10, 25, 43, 77, 99, 12, 84, 53, 21, 65, 33, 90]
+
+    # Plaintext fortemente enviesado (85% índice 0, 15% índice 3) cifrado em Z_256
+    random.seed(2026)
+    shifts = derivar_deslocamentos_chacha20(chave_bytes, nonce, num_bytes, 256)
+    cipher_bytes = [((0 if random.random() < 0.85 else 3) + s) & 0xFF for s in shifts]
+
+    # 2.1 Frequency (Monobit) Test
+    ones = sum(b.bit_count() for b in cipher_bytes)
+    s_n = 2 * ones - num_bits
+    s_obs = abs(s_n) / math.sqrt(num_bits)
+    p_monobit = math.erfc(s_obs / math.sqrt(2.0))
+
+    # 2.2 Block Frequency Test (M = 128 bits = 16 bytes)
+    m_block_bytes = 16
+    m_bits = m_block_bytes * 8
+    n_blocks = num_bytes // m_block_bytes
+    chi2_blk = 0.0
+    for i in range(0, n_blocks * m_block_bytes, m_block_bytes):
+        blk_ones = sum(b.bit_count() for b in cipher_bytes[i:i + m_block_bytes])
+        pi_j = blk_ones / m_bits
+        chi2_blk += (pi_j - 0.5) ** 2
+    chi2_blk *= 4.0 * m_bits
+    p_block_freq = chi2_p_value(chi2_blk, n_blocks)
+
+    # 2.3 Runs Test (transições entre bits adjacentes)
+    pi = ones / num_bits
+    tau = 2.0 / math.sqrt(num_bits)
+    if abs(pi - 0.5) >= tau:
+        p_runs = 0.0
+        v_obs = 0
+    else:
+        # Conta transições internas em cada byte + fronteiras entre bytes (MSB -> LSB)
+        trans_lut = [((x ^ (x >> 1)) & 0x7F).bit_count() for x in range(256)]
+        v_obs = 1
+        prev_lsb = None
+        for b in cipher_bytes:
+            v_obs += trans_lut[b]
+            if prev_lsb is not None and ((b >> 7) ^ prev_lsb):
+                v_obs += 1
+            prev_lsb = b & 1
+        num = abs(v_obs - 2.0 * num_bits * pi * (1.0 - pi))
+        den = 2.0 * math.sqrt(2.0 * num_bits) * pi * (1.0 - pi)
+        p_runs = math.erfc(num / den)
+
+    # 2.4 Longest Run of Ones in a Block (NIST SP 800-22 Sec. 2.4: M=10,000 bits, K=6, N=75)
+    # 10,000 bits = 1,250 bytes exatos; 75 blocos = 750,000 bits <= 1,000,000 bits
+    blk_b = 1250
+    n_lr = 75
+    probs_lr = [0.0882, 0.2092, 0.2483, 0.1933, 0.1208, 0.0675, 0.0727]
+    bins = [0] * 7
+    # Pré-computa (prefix_ones, max_run, suffix_ones) para cada valor de byte 0..255
+    byte_run_lut = []
+    for x in range(256):
+        bits_str = f"{x:08b}"
+        pref = len(bits_str) - len(bits_str.lstrip("1"))
+        suff = len(bits_str) - len(bits_str.rstrip("1"))
+        mx = max((len(seg) for seg in bits_str.split("0")), default=0)
+        byte_run_lut.append((pref, mx, suff))
+
+    for blk_idx in range(n_lr):
+        start = blk_idx * blk_b
+        max_run = 0
+        cur_run = 0
+        for b in cipher_bytes[start:start + blk_b]:
+            if b == 0xFF:
+                cur_run += 8
+                if cur_run > max_run:
+                    max_run = cur_run
+            elif b == 0:
+                cur_run = 0
+            else:
+                pref, mx, suff = byte_run_lut[b]
+                if cur_run + pref > max_run:
+                    max_run = cur_run + pref
+                if mx > max_run:
+                    max_run = mx
+                cur_run = suff
+        if max_run <= 10:
+            bins[0] += 1
+        elif max_run >= 16:
+            bins[6] += 1
+        else:
+            bins[max_run - 10] += 1
+
+    chi2_lr = sum(((bins[i] - n_lr * probs_lr[i]) ** 2) / (n_lr * probs_lr[i]) for i in range(7))
+    p_longest_run = chi2_p_value(chi2_lr, 6)
+
+    return {
+        "monobit_frequency": {"statistic": s_obs, "p_value": p_monobit, "pass": p_monobit >= 0.01},
+        "block_frequency_m128": {"statistic": chi2_blk, "p_value": p_block_freq, "pass": p_block_freq >= 0.01},
+        "runs": {"statistic": float(v_obs), "p_value": p_runs, "pass": p_runs >= 0.01},
+        "longest_run_m10000": {"statistic": chi2_lr, "p_value": p_longest_run, "pass": p_longest_run >= 0.01},
     }
 
 
@@ -529,6 +647,17 @@ def executar_bateria_estatistica():
         p_str = "< 1e-100" if v["p_value"] < 1e-100 else f"{v['p_value']:.3f}"
         print(f" -> {k:<16}: Cobertura = {v['unique_observed']:3d}/{v['vocab_size']:3d} termos | Chi2 = {v['chi_sq']:8.1f} | p = {p_str}")
 
+    # 4B. Subconjunto NIST SP 800-22 (1,000,000 bits) + Autocorrelação Multi-Lag (r1..r10)
+    print("\n[+] 4B. NIST SP 800-22 CORE SUBSET (1,000,000 bits Z_256) & MULTI-LAG AUTOCORR (r1..r10)")
+    nist = teste_nist_sp800_22_core(1_000_000)
+    for nome_t, res_t in nist.items():
+        status = "PASS" if res_t["pass"] else "FAIL"
+        print(f" -> NIST {nome_t:<22}: stat = {res_t['statistic']:9.4f} | p = {res_t['p_value']:.4f} [{status}]")
+    seq_chacha20 = perfis_disp[-1][1]
+    multi_lag = {f"r_{k}": teste_autocorrelacao_serial(seq_chacha20, k) for k in range(1, 11)}
+    max_abs_rk = max(abs(v) for v in multi_lag.values())
+    print(f" -> Multi-Lag r1..r10 (m=5,000): max |r_k| = {max_abs_rk:.4f} (limiar 95%: 0.0277, Bonferroni 99.5%: 0.0397)")
+
     # 5. Benchmark de Throughput (R=30 repetições)
     print("\n[+] 5. BENCHMARK DE THROUGHPUT (R=30 repetições após warmup, média ± DP)")
     tamanhos = [50, 500, 2000]
@@ -545,8 +674,10 @@ def executar_bateria_estatistica():
         "rfc8439_valid": {"sec_2_3_2_full64B": ok_232, "sec_2_5_2": ok_252, "sec_2_8_2_full": ok_282},
         "sac": {"key": av_key, "nonce": av_nonce},
         "dispersion_n20": tabela_disp,
+        "multi_lag_autocorr": {"lags": multi_lag, "max_abs_r": max_abs_rk},
         "scaling": escala,
         "msb_audit": msb,
+        "nist_sp800_22_1m_bits": nist,
         "throughput": bench,
     }
     out_path.write_text(json.dumps(payload_json, indent=2), encoding="utf-8")

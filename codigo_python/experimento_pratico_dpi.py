@@ -312,6 +312,97 @@ def executar_testes_tamper(chave_64: str, por_categoria: int = 250) -> dict[str,
     return contadores
 
 
+def executar_redteam_zipf(chave_64: str, trials: int = 1000) -> dict:
+    """
+    Auto-ataque red-team: detetor estatístico de razão de verosimilhança (LLR) entre
+    um modelo de prosa Zipf (s=1) sobre o léxico de cobertura e o modelo uniforme.
+    Tráfego 'natural' é um PROXY sintético Zipf (não corpus real); o fluxo Lexical AEAD
+    é uniforme por construção. Mede acerto do atacante em função da janela W de tokens.
+    """
+    cob = VOCABULARIO_COBERTURA_256
+    n = len(cob)
+    pesos = [1.0 / (r + 1) for r in range(n)]
+    z = sum(pesos)
+    p_zipf = [w / z for w in pesos]
+    log_ratio = [math.log(p_zipf[i] * n) for i in range(n)]  # log(P_zipf/P_unif)
+    cum = []
+    acc = 0.0
+    for p in p_zipf:
+        acc += p
+        cum.append(acc)
+
+    def amostra_zipf() -> int:
+        u = random.random()
+        lo, hi = 0, n - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if cum[mid] >= u:
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
+
+    idx_cob = MOTOR_OPTIMO_256.cob_para_id
+    res = {}
+    for w in (10, 20, 40, 88):
+        acertos_aead = 0
+        acertos_prosa = 0
+        for _ in range(trials):
+            # Pacote AEAD com exatamente w tokens totais (28 de metadados => w-28 payload; usa janela dos w primeiros)
+            msg = gerar_mensagem_operacional(60)
+            toks = cifrar_aead_lexical(msg, chave_64)
+            janela = toks[:w]
+            llr = sum(log_ratio[idx_cob[t]] for t in janela)
+            if llr < 0:  # mais verosímil uniforme => classificado como cifrado
+                acertos_aead += 1
+            prosa = [amostra_zipf() for _ in range(w)]
+            llr_p = sum(log_ratio[i] for i in prosa)
+            if llr_p >= 0:  # classificado corretamente como prosa
+                acertos_prosa += 1
+        res[str(w)] = {
+            "tpr_detecao_aead_pct": acertos_aead / trials * 100.0,
+            "tnr_prosa_pct": acertos_prosa / trials * 100.0,
+        }
+    return res
+
+
+def executar_loopback_udp(chave_64: str, chave_bytes: list[int], num_pkts: int = 300, palavras: int = 60) -> dict:
+    """
+    Transporte real em socket UDP loopback (127.0.0.1, stdlib): envia pacotes de 3 perfis,
+    recebe do kernel e aplica filtros F1-F3 sobre os datagramas recebidos.
+    MTU de payload UDP/IPv4 Ethernet = 1472 B (acima => fragmentaria em rede real; o loopback macOS tem MTU maior).
+    """
+    import socket
+
+    rx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    rx.bind(("127.0.0.1", 0))
+    rx.settimeout(2.0)
+    addr = rx.getsockname()
+    tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    perfis = {"Raw RFC 8439 Binary": 0, "RFC 8439 + Base-256 Cover": 0, "Lexical AEAD Z_256 (Ours)": 0}
+    out = {k: {"recebidos": 0, "sinalizados": 0, "acima_mtu_1472": 0} for k in perfis}
+    random.seed(7)
+    for _ in range(num_pkts):
+        msg = gerar_mensagem_operacional(palavras)
+        nonce = [random.randint(0, 255) for _ in range(12)]
+        pkts = {
+            "Raw RFC 8439 Binary": gerar_pacote_rfc8439_binario(chave_bytes, nonce, msg),
+            "RFC 8439 + Base-256 Cover": " ".join(cifrar_rfc8439_base256(msg, chave_64, nonce)).encode("utf-8"),
+            "Lexical AEAD Z_256 (Ours)": " ".join(cifrar_aead_lexical(msg, chave_64, nonce)).encode("utf-8"),
+        }
+        for nome, pkt in pkts.items():
+            tx.sendto(pkt, addr)
+            data, _ = rx.recvfrom(65535)
+            out[nome]["recebidos"] += 1
+            if len(data) > 1472:
+                out[nome]["acima_mtu_1472"] += 1
+            if dpi_inspecao_heuristica(data)["sinalizado_total"]:
+                out[nome]["sinalizados"] += 1
+    rx.close()
+    tx.close()
+    return out
+
+
 def executar_experimento_dpi(amostras_por_perfil: int = 1000):
     print("=" * 112)
     print(f" SIMULAÇÃO EMPÍRICA DE FILTROS HEURÍSTICOS DPI ({amostras_por_perfil} PACOTES/PERFIL EM 2 REGIMES)")
@@ -323,6 +414,16 @@ def executar_experimento_dpi(amostras_por_perfil: int = 1000):
 
     res_curto = executar_regime("REGIME A: Comandos Táticos Curtos", 6, amostras_por_perfil, chave_64, chave_bytes)
     res_longo = executar_regime("REGIME B: Relatórios Operacionais Extensos", 60, amostras_por_perfil, chave_64, chave_bytes)
+
+    redteam = executar_redteam_zipf(chave_64, trials=1000)
+    print("\n[+] RED-TEAM: DETETOR LLR ZIPF vs UNIFORME (1.000 tentativas por janela W)")
+    for w, r in redteam.items():
+        print(f" -> W={w:>2} tokens: deteção do fluxo AEAD = {r['tpr_detecao_aead_pct']:5.1f}% | prosa Zipf corretamente aceite = {r['tnr_prosa_pct']:5.1f}%")
+
+    loop = executar_loopback_udp(chave_64, chave_bytes, num_pkts=300, palavras=60)
+    print("\n[+] TRANSPORTE UDP LOOPBACK REAL (300 datagramas/perfil, 60 palavras):")
+    for nome, r in loop.items():
+        print(f" -> {nome:<27}: recebidos={r['recebidos']} | sinalizados F1-F3={r['sinalizados']} | > 1472 B (fragmentaria)={r['acima_mtu_1472']}")
 
     tamper = executar_testes_tamper(chave_64, por_categoria=250)
     total_rej = (
@@ -344,6 +445,8 @@ def executar_experimento_dpi(amostras_por_perfil: int = 1000):
         "regime_curto_6w": res_curto,
         "regime_extenso_60w": res_longo,
         "tamper_resistance": tamper,
+        "redteam_zipf_llr": redteam,
+        "udp_loopback_60w": loop,
     }
     out_path.write_text(json.dumps(dados_relatorio, indent=2), encoding="utf-8")
     print(f"\n[OK] Resultados gravados em '{out_path.name}'.")

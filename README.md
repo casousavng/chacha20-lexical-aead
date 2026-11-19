@@ -26,6 +26,8 @@ A zero-third-party-dependency Python 3 implementation of **Lexical Authenticated
 │   ├── experimento_pratico_dpi.py           # Two-regime stateless heuristic DPI & 1,000-trial tamper suite
 │   ├── resultado_benchmark.json             # Reference benchmark output
 │   └── resultado_experimento_dpi.json       # Reference DPI & tamper output
+├── ids_rules/perimeter_dpi.rules            # Reference Snort/Suricata rules (not executed on a live sensor)
+├── paper/                                   # LaTeX source, bibliography and compiled PDF
 ├── LICENSE                                  # MIT License
 └── README.md
 ```
@@ -47,3 +49,9 @@ The script executes all three validation phases and prints a dynamic summary dir
 ## License
 
 Released under the [MIT License](LICENSE).
+
+## v1.1.0 additions
+
+- 8-bit keystream fast path for `N | 256` (no wasted keystream), NIST SP 800-22 core subset (1M bits), multi-lag autocorrelation.
+- Red-team Zipf likelihood-ratio detector (shows the scheme does **not** resist linguistic-statistics adversaries) and real UDP loopback transport test.
+- Reference IDS rules in `ids_rules/` and the paper sources in `paper/`.
