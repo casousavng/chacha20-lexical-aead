@@ -10,7 +10,7 @@
       "alerta_f3_watchlist_pct": 100.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 0.164447
+      "latencia_us": 0.13165800000000003
     },
     "Raw RFC 8439 Binary": {
       "media_entropia": 5.918903048745635,
@@ -22,7 +22,7 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 182.547272
+      "latencia_us": 175.0905
     },
     "Lexical AEAD Z_20 (Legacy)": {
       "media_entropia": 3.8607993745221045,
@@ -34,7 +34,7 @@
       "alerta_f3_watchlist_pct": 100.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 192.13222
+      "latencia_us": 185.842061
     },
     "RFC 8439 + Base-256 Cover": {
       "media_entropia": 3.858601946726877,
@@ -46,7 +46,7 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 0.0,
       "taxa_evasao_pct": 100.0,
-      "latencia_us": 186.962153
+      "latencia_us": 179.200403
     },
     "Lexical AEAD Z_256 (Ours)": {
       "media_entropia": 3.8282238373915916,
@@ -58,7 +58,7 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 0.0,
       "taxa_evasao_pct": 100.0,
-      "latencia_us": 187.469414
+      "latencia_us": 181.51509
     }
   },
   "regime_extenso_60w": {
@@ -72,7 +72,7 @@
       "alerta_f3_watchlist_pct": 100.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 0.184392
+      "latencia_us": 0.181008
     },
     "Raw RFC 8439 Binary": {
       "media_entropia": 7.567338838327897,
@@ -84,7 +84,7 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 772.059011
+      "latencia_us": 774.677541
     },
     "Lexical AEAD Z_20 (Legacy)": {
       "media_entropia": 3.8789179724933827,
@@ -96,7 +96,7 @@
       "alerta_f3_watchlist_pct": 100.0,
       "taxa_detecao_total_pct": 100.0,
       "taxa_evasao_pct": 0.0,
-      "latencia_us": 331.082182
+      "latencia_us": 331.51916700000004
     },
     "RFC 8439 + Base-256 Cover": {
       "media_entropia": 3.8852509734826794,
@@ -108,7 +108,7 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 0.0,
       "taxa_evasao_pct": 100.0,
-      "latencia_us": 786.767933
+      "latencia_us": 786.5164139999999
     },
     "Lexical AEAD Z_256 (Ours)": {
       "media_entropia": 3.866035081610046,
@@ -120,7 +120,7 @@
       "alerta_f3_watchlist_pct": 0.0,
       "taxa_detecao_total_pct": 0.0,
       "taxa_evasao_pct": 100.0,
-      "latencia_us": 236.886508
+      "latencia_us": 237.940593
     }
   },
   "tamper_resistance": {
@@ -132,11 +132,11 @@
   },
   "redteam_zipf_llr": {
     "10": {
-      "tpr_detecao_aead_pct": 99.4,
-      "tnr_prosa_pct": 98.9
+      "tpr_detecao_aead_pct": 99.2,
+      "tnr_prosa_pct": 98.3
     },
     "20": {
-      "tpr_detecao_aead_pct": 100.0,
+      "tpr_detecao_aead_pct": 99.9,
       "tnr_prosa_pct": 100.0
     },
     "40": {

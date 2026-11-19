@@ -350,7 +350,7 @@ def executar_redteam_zipf(chave_64: str, trials: int = 1000) -> dict:
         for _ in range(trials):
             # Pacote AEAD com exatamente w tokens totais (28 de metadados => w-28 payload; usa janela dos w primeiros)
             msg = gerar_mensagem_operacional(60)
-            toks = cifrar_aead_lexical(msg, chave_64)
+            toks = cifrar_aead_lexical(msg, chave_64, [random.randint(0, 255) for _ in range(12)])
             janela = toks[:w]
             llr = sum(log_ratio[idx_cob[t]] for t in janela)
             if llr < 0:  # mais verosímil uniforme => classificado como cifrado
