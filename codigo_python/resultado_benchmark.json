@@ -1,0 +1,276 @@
+{
+  "rfc8439_valid": {
+    "sec_2_3_2_full64B": true,
+    "sec_2_5_2": true,
+    "sec_2_8_2_full": true
+  },
+  "sac": {
+    "key": {
+      "media_bits": 255.55666666666667,
+      "desvio_padrao": 11.49611489800137,
+      "percentual": 49.913411458333336,
+      "t_stat": -0.6679437921725108,
+      "p_value": 0.5046847188158925
+    },
+    "nonce": {
+      "media_bits": 255.84,
+      "desvio_padrao": 10.754841796771284,
+      "percentual": 49.96875,
+      "t_stat": -0.257677550676953,
+      "p_value": 0.7968330267147705
+    }
+  },
+  "dispersion_n20": {
+    "Biased Plaintext": {
+      "H": 0.6068291393579618,
+      "eta": 14.040704195791967,
+      "chi2": 69668.288,
+      "p_value": 0.0,
+      "r1": 0.016217867248767105
+    },
+    "Static Substitution": {
+      "H": 0.6068291393579618,
+      "eta": 14.040704195791967,
+      "chi2": 69668.288,
+      "p_value": 0.0,
+      "r1": 0.016217867248767063
+    },
+    "Vigenere (L=3)": {
+      "H": 2.191616650359144,
+      "eta": 50.709234449127536,
+      "chi2": 19891.392,
+      "p_value": 0.0,
+      "r1": -0.48047524244622536
+    },
+    "RC4 Stream Codebook": {
+      "H": 4.318607718387583,
+      "eta": 99.92317372184634,
+      "chi2": 23.152,
+      "p_value": 0.230713213609889,
+      "r1": 0.01781776522656548
+    },
+    "ChaCha20 Z_20 (RS)": {
+      "H": 4.320237827881695,
+      "eta": 99.96089090404658,
+      "chi2": 11.776,
+      "p_value": 0.8949754221621028,
+      "r1": 0.005255562997592425
+    }
+  },
+  "scaling": [
+    {
+      "label": "N=16",
+      "n": 16,
+      "rejection_sampling": true,
+      "entropia_empirica": 3.997808495337705,
+      "entropia_maxima": 4.0,
+      "chi_quadrado": 15.1744,
+      "df": 15,
+      "p_value": 0.4389293526426643,
+      "delta_p": 0.0
+    },
+    {
+      "label": "N=20 (Naive mod)",
+      "n": 20,
+      "rejection_sampling": false,
+      "entropia_empirica": 4.3205405912792685,
+      "entropia_maxima": 4.321928094887363,
+      "chi_quadrado": 9.584,
+      "df": 19,
+      "p_value": 0.9624725098123628,
+      "delta_p": 1.52587890625e-05
+    },
+    {
+      "label": "N=20 (Rej. Sampling)",
+      "n": 20,
+      "rejection_sampling": true,
+      "entropia_empirica": 4.320237827881695,
+      "entropia_maxima": 4.321928094887363,
+      "chi_quadrado": 11.776,
+      "df": 19,
+      "p_value": 0.8949754221621028,
+      "delta_p": 0.0
+    },
+    {
+      "label": "N=64",
+      "n": 64,
+      "rejection_sampling": true,
+      "entropia_empirica": 5.990874195766242,
+      "entropia_maxima": 6.0,
+      "chi_quadrado": 63.2192,
+      "df": 63,
+      "p_value": 0.4685464425774182,
+      "delta_p": 0.0
+    },
+    {
+      "label": "N=128",
+      "n": 128,
+      "rejection_sampling": true,
+      "entropia_empirica": 6.980477938727756,
+      "entropia_maxima": 7.0,
+      "chi_quadrado": 133.5168,
+      "df": 127,
+      "p_value": 0.32860122736107655,
+      "delta_p": 0.0
+    },
+    {
+      "label": "N=256 (Optimal)",
+      "n": 256,
+      "rejection_sampling": true,
+      "entropia_empirica": 7.960037514145846,
+      "entropia_maxima": 8.0,
+      "chi_quadrado": 277.0816,
+      "df": 255,
+      "p_value": 0.16348635092515668,
+      "delta_p": 0.0
+    }
+  ],
+  "msb_audit": {
+    "N20_nonce_msb": {
+      "unique_observed": 2,
+      "vocab_size": 20,
+      "chi_sq": 18062.72,
+      "p_value": 0.0
+    },
+    "N20_tag_msb": {
+      "unique_observed": 7,
+      "vocab_size": 20,
+      "chi_sq": 4160.7,
+      "p_value": 0.0
+    },
+    "N256_nonce_msb": {
+      "unique_observed": 256,
+      "vocab_size": 256,
+      "chi_sq": 220.288,
+      "p_value": 0.9432967474287342
+    },
+    "N256_tag_msb": {
+      "unique_observed": 256,
+      "vocab_size": 256,
+      "chi_sq": 235.648,
+      "p_value": 0.8023081301373257
+    }
+  },
+  "throughput": {
+    "estatica": {
+      "50": {
+        "throughput_mean": 47264089.19457229,
+        "throughput_std": 2906852.8808259,
+        "unit_us_mean": 0.0212479996359131,
+        "unit_us_std": 0.0015270780609508475
+      },
+      "500": {
+        "throughput_mean": 48611226.64564455,
+        "throughput_std": 646715.1906671834,
+        "unit_us_mean": 0.020574933296302333,
+        "unit_us_std": 0.00027634472167792226
+      },
+      "2000": {
+        "throughput_mean": 49602016.868414514,
+        "throughput_std": 1069633.8234034271,
+        "unit_us_mean": 0.020170016523479717,
+        "unit_us_std": 0.00045805935083949
+      }
+    },
+    "vigenere": {
+      "50": {
+        "throughput_mean": 11550072.943076186,
+        "throughput_std": 84417.53608629144,
+        "unit_us_mean": 0.08658399989750858,
+        "unit_us_std": 0.0006313060552207314
+      },
+      "500": {
+        "throughput_mean": 11854396.388521424,
+        "throughput_std": 885902.0226825809,
+        "unit_us_mean": 0.08507480039649333,
+        "unit_us_std": 0.009974937535532212
+      },
+      "2000": {
+        "throughput_mean": 11757815.999039395,
+        "throughput_std": 320748.75646356604,
+        "unit_us_mean": 0.08511249998264248,
+        "unit_us_std": 0.002379073713919089
+      }
+    },
+    "rc4": {
+      "50": {
+        "throughput_mean": 1010083.1128115567,
+        "throughput_std": 27390.572791045346,
+        "unit_us_mean": 0.9907753374136519,
+        "unit_us_std": 0.028927274803143704
+      },
+      "500": {
+        "throughput_mean": 1993916.594235317,
+        "throughput_std": 22523.033218178694,
+        "unit_us_mean": 0.501588667005611,
+        "unit_us_std": 0.005785914667111813
+      },
+      "2000": {
+        "throughput_mean": 2130884.4513426777,
+        "throughput_std": 36930.64136330597,
+        "unit_us_mean": 0.46942708334730315,
+        "unit_us_std": 0.008262388077649894
+      }
+    },
+    "chacha20_stream_z256": {
+      "50": {
+        "throughput_mean": 301347.31938494544,
+        "throughput_std": 11667.020404936808,
+        "unit_us_mean": 3.3237219989435594,
+        "unit_us_std": 0.1418203206760191
+      },
+      "500": {
+        "throughput_mean": 375560.5120959682,
+        "throughput_std": 6257.636673957465,
+        "unit_us_mean": 2.6634251333841044,
+        "unit_us_std": 0.04585214859953279
+      },
+      "2000": {
+        "throughput_mean": 380081.5988008944,
+        "throughput_std": 4063.9486968178517,
+        "unit_us_mean": 2.6313090499570535,
+        "unit_us_std": 0.028550946509109783
+      }
+    },
+    "lexical_aead_z256": {
+      "50": {
+        "throughput_mean": 165709.39201223696,
+        "throughput_std": 2936.758066231182,
+        "unit_us_mean": 6.03652799933722,
+        "unit_us_std": 0.10900013765042652
+      },
+      "500": {
+        "throughput_mean": 268005.9035654895,
+        "throughput_std": 3236.0686045476336,
+        "unit_us_mean": 3.7317943334831702,
+        "unit_us_std": 0.04569028966503766
+      },
+      "2000": {
+        "throughput_mean": 280757.27798586915,
+        "throughput_std": 2475.0329383603757,
+        "unit_us_mean": 3.5620639834329872,
+        "unit_us_std": 0.03151075467566097
+      }
+    },
+    "rfc8439_base256": {
+      "50": {
+        "throughput_mean": 80888.0382981566,
+        "throughput_std": 1187.7083931625077,
+        "unit_us_mean": 12.36539000456105,
+        "unit_us_std": 0.18480078741490025
+      },
+      "500": {
+        "throughput_mean": 91653.06291872247,
+        "throughput_std": 833.860354328469,
+        "unit_us_mean": 10.911591733505096,
+        "unit_us_std": 0.10024903047161758
+      },
+      "2000": {
+        "throughput_mean": 93917.77856158209,
+        "throughput_std": 408.31816616505915,
+        "unit_us_mean": 10.647806216669172,
+        "unit_us_std": 0.0463805510791043
+      }
+    }
+  }
+}
